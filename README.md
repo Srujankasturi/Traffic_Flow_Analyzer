@@ -1,33 +1,27 @@
-# Real-Time Traffic Flow Analyzer
+# Traffic Flow Analyzer
 
-A computer vision system that analyzes traffic density from video footage using Lucas-Kanade optical flow. Tracks motion across frames and classifies traffic conditions as Clear, Moderate, or Dense.
+Uses Lucas-Kanade optical flow to track motion in traffic footage and classify road conditions as clear, moderate, or dense in real time.
 
-## How It Works
+## How it works
 
-The system uses Lucas-Kanade sparse optical flow to track feature-rich points (corners, edges) across consecutive frames. Moving points are filtered from stationary background using a motion magnitude threshold, and the count of actively moving points is used to classify traffic density.
+Each frame, Shi-Tomasi corner detection finds trackable feature points — edges, corners, anything with texture. Lucas-Kanade then tracks where those points moved in the next frame. Points that barely moved get filtered out (stationary background, parked cars, camera shake). Whatever's left is counted as active motion, and that count drives the traffic label.
+
+One thing worth knowing: LK only tracks corners and edges, so smooth-sided vehicles without much surface texture can slip through undetected. The thresholds were calibrated for the test footage — different cameras and scenes will need retuning.
 
 **Pipeline:**
-1. Extract feature points using Shi-Tomasi corner detection
-2. Track points frame-to-frame using Lucas-Kanade optical flow
-3. Filter out stationary points using motion magnitude threshold
-4. Classify traffic density based on moving point count
-5. Display live metrics and colored motion trails on screen
+1. Shi-Tomasi corner detection on each frame
+2. Lucas-Kanade optical flow tracks points to the next frame
+3. Motion magnitude filter removes near-stationary points
+4. Moving point count classifies traffic as CLEAR / MODERATE / DENSE
+5. Trails and live metrics render on screen
 
-## Features
-
-- Real-time optical flow tracking with colored motion trails
-- Motion magnitude filtering to remove camera shake and stationary background
-- Live traffic density classification — Clear / Moderate / Dense
-- Average motion magnitude display for flow speed estimation
-- Automatic feature re-detection when tracked points are lost
-
-## Tech Stack
+## Stack
 
 - Python
-- OpenCV — video capture, optical flow, feature detection
-- NumPy — motion magnitude calculations
+- OpenCV — video capture, feature detection, optical flow
+- NumPy — magnitude calculations
 
-## Installation
+## Setup
 
 ```bash
 git clone https://github.com/Srujankasturi/Traffic_Flow_Analyzer.git
@@ -35,31 +29,25 @@ cd Traffic_Flow_Analyzer
 pip install opencv-python numpy
 ```
 
-## Usage
+Drop your video in the folder, rename it `traffic.mp4`, then:
 
 ```bash
 python optical_flow.py
 ```
 
-Place your video file in the project folder and rename it `traffic.mp4`. Press `q` to quit.
+Press `q` to quit.
 
-## Output Metrics
+## What's shown on screen
 
-| Metric | Description |
-|--------|-------------|
-| Moving points | Count of actively tracked moving feature points |
-| Avg motion | Mean displacement magnitude across all tracked points |
-| Traffic status | CLEAR / MODERATE / DENSE classification |
+| Metric | What it means |
+|--------|---------------|
+| Moving points | How many tracked points are actively moving |
+| Avg motion | Mean pixel displacement across tracked points |
+| Traffic status | CLEAR / MODERATE / DENSE |
 
-## Limitations & Known Issues
+## Known limitations
 
-- Lucas-Kanade tracks corners and edges — smooth-surfaced vehicles with low texture may not be detected
-- Thresholds are calibrated per camera deployment and should be tuned for different scenes
-- Minor camera shake can introduce noise — mitigated via motion magnitude filtering
-
-## Use Case
-
-Applicable to smart city infrastructure, CCTV-based traffic monitoring, and AI-powered operations insight platforms that require real-time situational awareness from video feeds.
+LK optical flow misses vehicles with smooth, textureless surfaces — not enough corners to latch onto. The fix would be combining it with a detection model (YOLOv8) to locate vehicles first, then track them. The density thresholds also need manual calibration per camera — what counts as "dense" on a narrow street is different from a highway.
 
 ## Author
 

@@ -59,17 +59,17 @@ while True:
 
         mag = get_magnitude(new, old)
 
-        if mag < 0.5:  # skip stationary points
+        if mag < 2.5:  # skip stationary points
             continue
 
         vehicle_count += 1
         mask = cv2.line(mask, (a, b), (c, d), colors[i % 200].tolist(), 2)
         frame = cv2.circle(frame, (a, b), 5, colors[i % 200].tolist(), -1)
 
-    if vehicle_count < 10:
+    if vehicle_count < 20:
         traffic_status = "CLEAR"
         color = (0, 255, 0)
-    elif vehicle_count < 30:
+    elif vehicle_count < 60:
         traffic_status = "MODERATE"
         color = (0, 255, 255)
     else:
